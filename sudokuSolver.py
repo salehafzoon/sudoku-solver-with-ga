@@ -94,20 +94,22 @@ class Individual(object):
     def mutate(self):
 
         #select one of puzzle subgrid randomly(first index of subgrid)
-        sub_grid_index = random.choice(list([x*9 for x in range(9)]))
-
-        first_index = random.choice(list(range(sub_grid_index , sub_grid_index + 9)))
+        block_index = random.randint(0,8)
+        block = self.chromosome[block_index]
+        first_index = random.randint(0,8)
         while True:
-            second_index = random.choice(list(range(sub_grid_index , sub_grid_index + 9)))
+            second_index = random.randint(0,8)
             if first_index != second_index:
                 break
-        print("sub_grid_index:",sub_grid_index,"first_index:",first_index,"second_index:",second_index)
-        print("first:",self.chromosome[first_index],"second:",self.chromosome[second_index])
+        print("block:",block,"first_index:",first_index,"second_index:",second_index)
+        print("first:",block[first_index],"second:",block[second_index])
         
         #swaping two index values
-        self.chromosome[first_index], self.chromosome[second_index] = self.chromosome[second_index],self.chromosome[first_index]
-        print("first:",self.chromosome[first_index],"second:",self.chromosome[second_index])
-    
+        block[first_index], block[second_index] = block[second_index],block[first_index]
+        self.chromosome[block_index] = block
+        print("first:",self.chromosome[block_index][first_index],
+            "second:",self.chromosome[block_index][second_index])
+
     def crossOver(self, parent2):
         return
     
@@ -123,14 +125,11 @@ class Individual(object):
                     rows.append(numbers)
                     numbers = []
 
-        # self.standardFormat = rows
-        # print("rows:",self.standardFormat)
-        
         for row in rows:
-            print("row:",row,"duplicate:",countDuplicateElement(row))
+            # print("row:",row,"duplicate:",countDuplicateElement(row))
             duplication += countDuplicateElement(row)
         
-        print("\n")
+        # print("\n")
         return duplication
 
     def countColDuplication(self,blocks):
@@ -141,9 +140,9 @@ class Individual(object):
         #we start from block 0 , block 1 , block 2 
         # and go downward to caculate columns
         for i in range(3):
+
             #and go downward block by block
-                #go in each block downward number by number
-                
+            #go in each block downward number by number    
             for k in range(3):
                 for j in range(i,i+9,3):
                     numbers.append(blocks[j][k])
@@ -156,14 +155,14 @@ class Individual(object):
         
 
         for column in columns:
-            print("col:",column,"duplicate:",countDuplicateElement(column))
+            # print("col:",column,"duplicate:",countDuplicateElement(column))
             duplication += countDuplicateElement(column)
 
         return duplication
 
     def call_fitness(self):
         fitness = 0
-        print("blocks:",self.chromosome)
+        # print("blocks:",self.chromosome)
 
         fitness += self.countRowDuplication(self.chromosome)
         fitness += self.countColDuplication(self.chromosome)
@@ -192,7 +191,8 @@ if __name__ == '__main__':
     for _ in range(POPULATION_SIZE):
         gnome = Individual.create_chromosome()
         indiv = Individual(gnome)
-
+        print("chromosome:",indiv.chromosome)
+        indiv.mutate()
         # population.append(indiv)
     
     # while not found:
