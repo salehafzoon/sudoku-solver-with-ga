@@ -30,6 +30,17 @@ CROSSOVER_RATE =0.5
 ELITSM = 0.8
 MAX_GENERATION = 50000
 
+def countDuplicateElement(array):
+    duplication = 0
+    seen = []
+    for element in array:
+        if element in seen:
+            duplication +=1
+        else:
+            seen.append(element)
+    
+    return duplication
+
 class Individual(object):
 
     def __init__(self, chromosome):
@@ -72,32 +83,90 @@ class Individual(object):
     
     def crossOver(self, parent2):
         return
+    
+    def countRowDuplication(self,blocks):
+        duplication = 0
+        numbers = []
+        rows = []
+
+        for i in range(0,6,3):
+            for block in blocks:
+                numbers += block[i:i+2]
+            if len(numbers) == 9:
+                rows.append(numbers)
+                numbers = []
+        for row in rows:
+            duplication += countDuplicateElement(row)
+
+        return
+
+    def countColDuplication(self,blocks):
+        duplication = 0
+        numbers = []
+        columns = []
+
+        #we start from block 0 , block 1 , block 2 
+        # and go downward to caculate columns
+        for i in range(3):
+
+            #and go downward block by block
+            for j in range(i,i+9,3):
+                #go in each block downward number by number
+                for k in range(3):
+                    numbers +=blocks[j][k]
+                    numbers +=blocks[j][k+3]
+                    numbers +=blocks[j][k+6]
+                if len(numbers) == 9:
+                    columns.append(numbers)
+                numbers = []
+
+        for column in columns:
+            duplication += countDuplicateElement(column)
+
+        return duplication
 
     def call_fitness(self):
-
         fitness = 0
+        blocks = []
+        for i in range(0,81,9):
+            blocks.append(self.chromosome[i:i+9])
+
+        fitness += self.countRowDuplication(blocks)
+        fitness += self.countColDuplication(blocks)
 
         return fitness
+    
+    @classmethod
+    def tournomentSelection(self, population):
+        best = None
+        for _ in range(TOURNAMENT_SIZE):
+            indiv = random.choice(population)
+            if (best == None) or indiv.fitness > best.fitness:
+                best = indiv
 
+        return (best)
 
 if __name__ == '__main__':
 
-    #initial sudoku puzzle
-    Individual.setOriginalPuzzle(sudoku)
+    l = [1,1,1,3,3,4,4,4,4,5]
+    print(countDuplicateElement(l))
 
-    #create first generation
-    for _ in range(POPULATION_SIZE):
-        gnome = Individual.create_chromosome()
-        indiv = Individual(gnome)
-        print(indiv.chromosome)
-        indiv.mutate()
-        print(indiv.chromosome)
-        indiv.mutate()
-        print(indiv.chromosome)
-        indiv.mutate()
-        print(indiv.chromosome)
+    # #initial sudoku puzzle
+    # Individual.setOriginalPuzzle(sudoku)
 
-        # population.append(indiv)
+    # #create first generation
+    # for _ in range(POPULATION_SIZE):
+    #     gnome = Individual.create_chromosome()
+    #     indiv = Individual(gnome)
+    #     print(indiv.chromosome)
+    #     indiv.mutate()
+    #     print(indiv.chromosome)
+    #     indiv.mutate()
+    #     print(indiv.chromosome)
+    #     indiv.mutate()
+    #     print(indiv.chromosome)
+
+    #     # population.append(indiv)
     
     # while not found:
 
