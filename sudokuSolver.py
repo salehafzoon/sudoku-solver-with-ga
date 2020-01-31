@@ -40,16 +40,40 @@ def countDuplicateElement(array):
             seen.append(element)
     
     return duplication
+    
 
 class Individual(object):
 
     def __init__(self, chromosome):
+        self.standardFormat = None
         self.chromosome = chromosome
         self.fitness = self.call_fitness()
-    
+        
+    @classmethod
+    def convertToBlockFormat(self,puzzle):
+        blocks = []
+        #divide puzzle to 3 rows consist of 
+        # 3 blocks horizontally.
+        #iterate over rows
+        for i in range(0,9,3):
+            #each horizontal row contains 3 normal rows
+            rowList = []
+            rowList.append(puzzle[ i*9 : (i+1)*9 ])
+            rowList.append(puzzle[ (i+1)*9 : (i+2)*9 ])
+            rowList.append(puzzle[ (i+2)*9 : (i+3)*9 ])
+            
+            for j in range(0,9,3):
+                block = []
+                for row in rowList:
+                    block += row[j:j+3]
+                blocks.append(block)
+
+        return blocks
+
     @classmethod
     def setOriginalPuzzle(self,puzzle):
-        self.original_puzzle = puzzle
+        self.original_puzzle = Individual.convertToBlockFormat(puzzle)
+        print(self.original_puzzle)
 
     @classmethod
     def create_chromosome(self):
@@ -89,16 +113,21 @@ class Individual(object):
         numbers = []
         rows = []
 
-        for i in range(0,6,3):
+        for i in range(0,9,3):
             for block in blocks:
-                numbers += block[i:i+2]
-            if len(numbers) == 9:
-                rows.append(numbers)
-                numbers = []
-        for row in rows:
-            duplication += countDuplicateElement(row)
+                numbers += block[i:i+3]
+                if len(numbers) == 9:
+                    rows.append(numbers)
+                    numbers = []
 
-        return
+        # self.standardFormat = rows
+        # print("rows:",self.standardFormat)
+        
+        for row in rows:
+            # print("row duplications:",countDuplicateElement(row))
+            duplication += countDuplicateElement(row)
+        
+        return duplication
 
     def countColDuplication(self,blocks):
         duplication = 0
@@ -113,15 +142,19 @@ class Individual(object):
             for j in range(i,i+9,3):
                 #go in each block downward number by number
                 for k in range(3):
-                    numbers +=blocks[j][k]
-                    numbers +=blocks[j][k+3]
-                    numbers +=blocks[j][k+6]
+                    numbers.append(blocks[j][k])
+                    numbers.append(blocks[j][k+3])
+                    numbers.append(blocks[j][k+6])
                 if len(numbers) == 9:
                     columns.append(numbers)
                 numbers = []
+        
+        print("columns:",columns)
 
         for column in columns:
+            print("column duplications:",countDuplicateElement(column))
             duplication += countDuplicateElement(column)
+
 
         return duplication
 
@@ -130,8 +163,10 @@ class Individual(object):
         blocks = []
         for i in range(0,81,9):
             blocks.append(self.chromosome[i:i+9])
+        print(self.chromosome)
+        print("blocks:",blocks)
 
-        fitness += self.countRowDuplication(blocks)
+        # fitness += self.countRowDuplication(blocks)
         fitness += self.countColDuplication(blocks)
 
         return fitness
@@ -148,22 +183,16 @@ class Individual(object):
 
 if __name__ == '__main__':
 
-    l = [1,1,1,3,3,4,4,4,4,5]
-    print(countDuplicateElement(l))
+    # l = [1,1,1,3,3,4,4,4,4,5]
+    # print(countDuplicateElement(l))
 
-    # #initial sudoku puzzle
-    # Individual.setOriginalPuzzle(sudoku)
+    #initial sudoku puzzle
+    Individual.setOriginalPuzzle(sudoku)
 
     # #create first generation
     # for _ in range(POPULATION_SIZE):
     #     gnome = Individual.create_chromosome()
     #     indiv = Individual(gnome)
-    #     print(indiv.chromosome)
-    #     indiv.mutate()
-    #     print(indiv.chromosome)
-    #     indiv.mutate()
-    #     print(indiv.chromosome)
-    #     indiv.mutate()
     #     print(indiv.chromosome)
 
     #     # population.append(indiv)
