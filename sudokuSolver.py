@@ -72,8 +72,7 @@ class Individual(object):
 
     @classmethod
     def setOriginalPuzzle(self,puzzle):
-        self.original_puzzle = Individual.convertToBlockFormat(puzzle)
-        print(self.original_puzzle)
+        self.original_puzzle = puzzle
 
     @classmethod
     def create_chromosome(self):
@@ -85,6 +84,10 @@ class Individual(object):
             for x in self.original_puzzle :
                 y = x if x!=0 else randint(1, 9)
                 chromosome.append(y)
+            
+            print("sudoku:",chromosome)
+            
+            chromosome = Individual.convertToBlockFormat(chromosome)
             
             return chromosome
     
@@ -124,9 +127,10 @@ class Individual(object):
         # print("rows:",self.standardFormat)
         
         for row in rows:
-            # print("row duplications:",countDuplicateElement(row))
+            print("row:",row,"duplicate:",countDuplicateElement(row))
             duplication += countDuplicateElement(row)
         
+        print("\n")
         return duplication
 
     def countColDuplication(self,blocks):
@@ -137,37 +141,32 @@ class Individual(object):
         #we start from block 0 , block 1 , block 2 
         # and go downward to caculate columns
         for i in range(3):
-
             #and go downward block by block
-            for j in range(i,i+9,3):
                 #go in each block downward number by number
-                for k in range(3):
+                
+            for k in range(3):
+                for j in range(i,i+9,3):
                     numbers.append(blocks[j][k])
                     numbers.append(blocks[j][k+3])
                     numbers.append(blocks[j][k+6])
+
                 if len(numbers) == 9:
                     columns.append(numbers)
-                numbers = []
+                    numbers = []
         
-        print("columns:",columns)
 
         for column in columns:
-            print("column duplications:",countDuplicateElement(column))
+            print("col:",column,"duplicate:",countDuplicateElement(column))
             duplication += countDuplicateElement(column)
-
 
         return duplication
 
     def call_fitness(self):
         fitness = 0
-        blocks = []
-        for i in range(0,81,9):
-            blocks.append(self.chromosome[i:i+9])
-        print(self.chromosome)
-        print("blocks:",blocks)
+        print("blocks:",self.chromosome)
 
-        # fitness += self.countRowDuplication(blocks)
-        fitness += self.countColDuplication(blocks)
+        fitness += self.countRowDuplication(self.chromosome)
+        fitness += self.countColDuplication(self.chromosome)
 
         return fitness
     
@@ -189,13 +188,12 @@ if __name__ == '__main__':
     #initial sudoku puzzle
     Individual.setOriginalPuzzle(sudoku)
 
-    # #create first generation
-    # for _ in range(POPULATION_SIZE):
-    #     gnome = Individual.create_chromosome()
-    #     indiv = Individual(gnome)
-    #     print(indiv.chromosome)
+    #create first generation
+    for _ in range(POPULATION_SIZE):
+        gnome = Individual.create_chromosome()
+        indiv = Individual(gnome)
 
-    #     # population.append(indiv)
+        # population.append(indiv)
     
     # while not found:
 
