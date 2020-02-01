@@ -6,15 +6,17 @@ import numpy as np
 from random import randint
 
 sudoku=[
-8,0,0,0,0,0,0,0,0,
-0,0,3,6,0,0,0,0,0,
-0,7,0,0,9,0,2,0,0,
-0,5,0,0,0,7,0,0,0,
-0,0,0,0,4,5,7,0,0,
-0,0,0,1,0,0,0,3,0,
-0,0,1,0,0,0,0,6,8,
-0,0,8,5,0,0,0,1,0,
-0,9,0,0,0,0,4,0,0]
+0,0,0,0,0,0,5,2,0,
+9,0,2,1,0,0,7,3,4,
+0,0,7,9,0,2,0,8,0,
+
+8,2,9,7,0,0,0,0,5,
+0,0,0,8,0,6,0,0,0,
+5,0,0,0,0,9,3,7,8,
+
+0,1,0,5,0,3,4,0,0,
+6,3,5,0,0,7,2,0,1,
+0,9,4,0,0,0,0,0,0,]
 
 start = time.time()
 generation = 1
@@ -23,7 +25,7 @@ population = []
 best_fits = []
 avg_fits = []
 
-POPULATION_SIZE = 200
+POPULATION_SIZE = 1
 TOURNAMENT_SIZE = 3
 MUTATION_RATE = 0.1
 CROSSOVER_RATE =0.5
@@ -94,6 +96,7 @@ class Individual(object):
                 y = x if x!=0 else randint(1, 9)
                 chromosome.append(y)
             
+            print("initial:",chromosome)
             chromosome = Individual.convertToBlockFormat(chromosome)
             
             return chromosome
@@ -175,10 +178,10 @@ class Individual(object):
                     numbers = []
 
         for row in rows:
-            # print("row:",row,"duplicate:",countDuplicateElement(row))
+            print("row:",row,"duplicate:",calculateListFitness(row))
             fitness += calculateListFitness(row)
         
-        # print("\n")
+        print("\n")
         return fitness
 
     def countColDuplication(self,blocks):
@@ -203,7 +206,7 @@ class Individual(object):
                     numbers = []
         
         for column in columns:
-            # print("col:",column,"duplicate:",countDuplicateElement(column))
+            print("col:",column,"duplicate:",calculateListFitness(column))
             fitness += calculateListFitness(column)
 
         return fitness
@@ -228,69 +231,67 @@ class Individual(object):
 
 if __name__ == '__main__':
 
-    # l = [1,1,1,3,3,4,4,4,4,5]
-    # print(countDuplicateElement(l))
-
     #initial sudoku puzzle
     Individual.setOriginalPuzzle(sudoku)
 
     #create first generation
     for _ in range(POPULATION_SIZE):
         chromosome = Individual.create_chromosome()
-        indiv = Individual(chromosome)  
-        indiv.mutate()
+        indiv = Individual(chromosome)
+        # indiv.mutate()
         # print(indiv.fitness)
-        population.append(indiv)
+        # population.append(indiv)
     
-    while not found:
-        population = sorted(population, reverse=False, key=lambda x: x.fitness)
+    # while not found:
+    #     population = sorted(population, reverse=False, key=lambda x: x.fitness)
 
-        best_fits.append(population[0].fitness)
-        avg_fits.append(np.mean([p.fitness for p in population]))
+    #     best_fits.append(population[0].fitness)
+    #     avg_fits.append(np.mean([p.fitness for p in population]))
 
-        # print("generation:", generation, " best fit:", population[0].fitness)
-        print("generation:", generation, " fits:", population[0].fitness,population[1].fitness
-        ,population[2].fitness,population[3].fitness)
+    #     print("generation:", generation, " best fit:", population[0].fitness)
+       
+    #     if population[0].fitness == 0:
+    #         found = True
+    #         break
+    #     if generation == MAX_GENERATION:
+    #         print("not found")
+    #         break
 
-        if population[0].fitness == 0:
-            found = True
-            break
+    #     new_generation = []
 
-        new_generation = []
-
-        # elitism 80%
-        index = int(POPULATION_SIZE * ELITSM)
-        new_generation += population[0:index]
+    #     # elitism 80%
+    #     index = int(POPULATION_SIZE * ELITSM)
+    #     new_generation += population[0:index]
         
-        for _ in range(POPULATION_SIZE* int((1-ELITSM))):
+    #     for _ in range(int( POPULATION_SIZE* (1-ELITSM) ) ):
 
-            # parent selection with Tournament
-            parent1 = Individual.tournomentSelection(population[index:])
-            parent2= Individual.tournomentSelection(population[index:])
+    #         # parent selection with Tournament
+    #         parent1 = Individual.tournomentSelection(population[index:])
+    #         parent2= Individual.tournomentSelection(population[index:])
             
-            if random.random() > CROSSOVER_RATE :
-                child1,child2 = parent1.uniformCrossOver(parent2)
-            else:
-                child1,child2 = parent1,parent2
+    #         if random.random() < 1 :
+    #             child1,child2 = parent1.uniformCrossOver(parent2)
+    #         else:
+    #             child1,child2 = parent1,parent2
 
-            if random.random() > MUTATION_RATE :
-                child1.mutate()
+    #         if random.random() < MUTATION_RATE :
+    #             child1.mutate2()
 
-            if random.random() > MUTATION_RATE :
-                child2.mutate()
+    #         if random.random() < MUTATION_RATE :
+    #             child2.mutate2()
 
-            new_generation.append(child1)
-            new_generation.append(child2)
+    #         new_generation.append(child1)
+    #         new_generation.append(child2)
 
-        population = new_generation
-        generation += 1
+    #     population = new_generation
+    #     generation += 1
 
-    if found:
-        print("generation : ", generation, "       ",
-            population[0].chromosome,  population[0].fitness)
-        # plotResult()
+    # if found:
+    #     print("generation : ", generation, "       ",
+    #         population[0].chromosome,  population[0].fitness)
+    #     # plotResult()
         
-    duration = time.time() - start
-    print("minute:", (duration)//60)
-    print("second:", (duration) % 60)
+    # duration = time.time() - start
+    # print("minute:", (duration)//60)
+    # print("second:", (duration) % 60)
     
