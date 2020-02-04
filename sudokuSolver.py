@@ -25,13 +25,13 @@ population = []
 best_fits = []
 avg_fits = []
 
-POPULATION_SIZE = 1000
-TOURNAMENT_SIZE = 4
-MUTATION_RATE = 0.3
-CROSSOVER_RATE = 1
-ELITSM = 0.4
-MAX_GENERATION = 100
-FITNESS_MODE = "mode2"
+POPULATION_SIZE = 500
+TOURNAMENT_SIZE = 3
+MUTATION_RATE = 0.1
+CROSSOVER_RATE = 0.5
+ELITSM = 0.8
+MAX_GENERATION = 3000
+FITNESS_MODE = "mode1"
 MAX_FITNESS = 144
 XOVER_METHOD = "orderOne"
 
@@ -104,6 +104,7 @@ class Individual(object):
     def setOriginalPuzzle(self,puzzle):
         self.original_puzzle = puzzle
         self.helpArray = Individual.convertToBlockFormat(self.original_puzzle)
+        print("help:",self.helpArray)
 
     @classmethod
     def create_chromosome(self):
@@ -196,9 +197,6 @@ class Individual(object):
             if index1 > index2:
                 index1 , index2 = index2 , index1
             
-            # index1 = 2  
-            # index2 = 3
-
             child1= [[],[],[],[],[],[],[],[],[]]
             child2= [[],[],[],[],[],[],[],[],[]]
             
@@ -209,16 +207,9 @@ class Individual(object):
             i1 = index2 + 1
             i2 = index2 + 1
 
-            for i in range(index2+1,9):
-                if self.chromosome[i] not in child2:
-                    child2[i1] = self.chromosome[i]
-                    i1 += 1
-                
-                if parent2.chromosome[i] not in child1:
-                    child1[i2] = parent2.chromosome[i]
-                    i2 += 1
-            
-            for i in range(0,index2):
+            i = index2 + 1 
+            while True :
+                i = i % 9
                 i1 = i1 % 9
                 i2 = i2 % 9
                 if self.chromosome[i] not in child2:
@@ -229,6 +220,10 @@ class Individual(object):
                     child1[i2] = parent2.chromosome[i]
                     i2 += 1
 
+                if [] not in child1 and [] not in child2:
+                    break
+                i += 1
+            
             # if bug:
                 # print("parent1:",self.chromosome)
                 # print("parent2:",parent2.chromosome)
@@ -262,9 +257,6 @@ class Individual(object):
         numbers = []
         columns = []
 
-        # print(blocks)
-        # print(len(blocks))
-        
         #we start from block 0 , block 1 , block 2 
         # and go downward to caculate columns
         for i in range(3):
@@ -315,11 +307,11 @@ if __name__ == '__main__':
     #initial sudoku puzzle
     Individual.setOriginalPuzzle(sudoku)
 
-    #create first generation
-    for _ in range(POPULATION_SIZE):
-        chromosome = Individual.create_chromosome()
-        indiv = Individual(chromosome)
-        population.append(indiv)
+    # #create first generation
+    # for _ in range(POPULATION_SIZE):
+    #     chromosome = Individual.create_chromosome()
+    #     indiv = Individual(chromosome)
+    #     population.append(indiv)
 
 #     population[0].chromosome = [[4, 7, 1, 9, 1, 2, 6, 2, 7], [2, 6, 3, 1, 5, 9, 9, 8, 2], [2, 8, 9, 7, 3, 4, 3, 5, 2], [7, 2, 8, 5, 1, 9, 6, 8, 
 # 3], [7, 6, 1, 8, 1, 6, 3, 3, 9], [1, 3, 5, 9, 9, 3, 5, 7, 8], [6, 5, 2, 3, 1, 6, 1, 9, 4], [5, 8, 3, 5, 9, 7, 9, 3, 4], [4, 7, 9, 2, 5, 1, 2, 9, 7]]
