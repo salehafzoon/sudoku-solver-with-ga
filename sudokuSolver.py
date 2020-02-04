@@ -4,19 +4,20 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 from random import randint
+import matplotlib.pyplot as plt
 
 sudoku=[
-0,0,0,  0,0,0,  5,2,0,
-9,0,2,  1,0,0,  7,3,4,
-0,0,7,  9,0,2,  0,8,0,
+0,0,0,	0,2,7	,0,5,0,
+0,3,4,	0,5,0	,6,0,2,
+0,0,5,	0,0,4	,9,0,8,
 
-8,2,9,  7,0,0,  0,0,5,
-0,0,0,  8,0,6,  0,0,0,
-5,0,0,  0,0,9,  3,7,8,
+0,6,2,	4,0,0,	0,0,0,
+8,0,0,	2,0,1,	0,0,4,
+0,0,0,	0,0,8,	2,9,0,
 
-0,1,0,  5,0,3,  4,0,0,
-6,3,5,  0,0,7,  2,0,1,
-0,9,4,  0,0,0,  0,0,0]
+2,0,6,	9,0,0,	3,0,0,
+5,0,9,	0,3,0,	1,8,0,
+0,8,0,	1,4,0,	0,0,0]
 
 start = time.time()
 generation = 1
@@ -24,16 +25,42 @@ found = False
 population = []
 best_fits = []
 avg_fits = []
+diversity = []
 
 POPULATION_SIZE = 500
 TOURNAMENT_SIZE = 3
 MUTATION_RATE = 0.1
 CROSSOVER_RATE = 0.5
 ELITSM = 0.8
-MAX_GENERATION = 3000
+MAX_GENERATION = 100
 FITNESS_MODE = "mode1"
 MAX_FITNESS = 144
-XOVER_METHOD = "orderOne"
+XOVER_METHOD = "uniform"
+
+def plotResult():
+
+    global generation
+    generation +=1
+
+    for i in range(generation):
+        best_fits [i] = 1 - (best_fits [i]/144)
+        avg_fits [i] = 1 - (avg_fits [i]/144)
+        
+    plt.plot(list(range(generation)), best_fits, 'go-',
+             label='best of generations', linewidth=1)
+    plt.show()
+
+    plt.plot(list(range(generation)), avg_fits, 'bo-',
+             label='avg of generations', linewidth=1)
+    plt.show()
+
+def plotDiversity():
+    global generation
+    generation +=1
+    
+    plt.plot(list(range(generation)), diversity, 'go-',
+             label='diversity per generation', linewidth=1)
+    plt.show()
 
 def calculateListFitness(array):
     l = list(range(1,10))
@@ -104,7 +131,7 @@ class Individual(object):
     def setOriginalPuzzle(self,puzzle):
         self.original_puzzle = puzzle
         self.helpArray = Individual.convertToBlockFormat(self.original_puzzle)
-        print("help:",self.helpArray)
+        # print("help:",self.helpArray)
 
     @classmethod
     def create_chromosome(self):
@@ -302,36 +329,52 @@ class Individual(object):
 
         return (best)
 
-if __name__ == '__main__':
+def initial_population():
+    population = []
+    for _ in range(POPULATION_SIZE):
+        chromosome = Individual.create_chromosome()
+        indiv = Individual(chromosome)
+        population.append(indiv)
+
+    return population
+
+def calculateDiversity(population):
+    fitnesses = []
+    for indiv in population:
+        fitnesses.append(indiv.fitness)
+
+    return len(set(fitnesses))
+
+def ga():
+
+    global generation
+    global population
+    global best_fits
+    global avg_fits
+    best_fits = []
+    avg_fits = []
 
     #initial sudoku puzzle
     Individual.setOriginalPuzzle(sudoku)
 
-    # #create first generation
-    # for _ in range(POPULATION_SIZE):
-    #     chromosome = Individual.create_chromosome()
-    #     indiv = Individual(chromosome)
-    #     population.append(indiv)
-
-#     population[0].chromosome = [[4, 7, 1, 9, 1, 2, 6, 2, 7], [2, 6, 3, 1, 5, 9, 9, 8, 2], [2, 8, 9, 7, 3, 4, 3, 5, 2], [7, 2, 8, 5, 1, 9, 6, 8, 
-# 3], [7, 6, 1, 8, 1, 6, 3, 3, 9], [1, 3, 5, 9, 9, 3, 5, 7, 8], [6, 5, 2, 3, 1, 6, 1, 9, 4], [5, 8, 3, 5, 9, 7, 9, 3, 4], [4, 7, 9, 2, 5, 1, 2, 9, 7]]
-
-#     population[1].chromosome =  [[4, 7, 1, 9, 1, 2, 6, 2, 7], [2, 6, 3, 1, 5, 9, 9, 8, 2], [2, 8, 9, 7, 3, 4, 3, 5, 2], [7, 6, 1, 8, 1, 6, 3, 3, 
-# 9], [1, 3, 5, 9, 9, 3, 5, 7, 8], [4, 3, 6, 5, 7, 1, 5, 6, 8], [2, 6, 1, 3, 5, 1, 9, 9, 4], [5, 8, 3, 5, 9, 7, 9, 3, 4], [4, 8, 9, 2, 1, 1, 4, 8, 6]]
-
-    # population[0].crossOver(population[1])
+    #create first generation
+    population = initial_population()
+    found = False
+    generation = 0
     
     while not found:
+
         population = sorted(population, reverse=False, key=lambda x: x.fitness)
 
         best_fits.append(population[0].fitness)
         avg_fits.append(np.mean([p.fitness for p in population]))
+        diversity.append( calculateDiversity(population) )
 
         # for ind in population[0:6]:
         #     print(ind.fitness ,"   ",end="")
         # print("\n")
 
-        print("generation:", generation, " best fit:", population[0].fitness)
+        # print("generation:", generation, " best fit:", population[0].fitness)
        
         if population[0].fitness == 1:
             found = True
@@ -346,7 +389,7 @@ if __name__ == '__main__':
         index = int(POPULATION_SIZE * ELITSM)
         new_generation += population[0:index]
         
-        for _ in range(int( POPULATION_SIZE* (1-ELITSM) ) ):
+        for _ in range(int( POPULATION_SIZE * (1-ELITSM) ) ):
 
             # parent selection with Tournament
             parent1 = Individual.tournomentSelection(population[index:])
@@ -358,10 +401,10 @@ if __name__ == '__main__':
                 child1,child2 = parent1,parent2
 
             if random.random() < MUTATION_RATE :
-                child1.mutate2()
+                child1.mutate1()
 
             if random.random() < MUTATION_RATE :
-                child2.mutate2()
+                child2.mutate1()
 
             new_generation.append(child1)
             new_generation.append(child2)
@@ -369,14 +412,31 @@ if __name__ == '__main__':
         population = new_generation
         generation += 1
 
-    print("generation : ", generation, "       ",
-        population[0].chromosome,  population[0].fitness)
-    
-    population[0].printStandardFormat()
-    
     # plotResult()
-        
-    duration = time.time() - start
-    print("minute:", (duration)//60)
-    print("second:", (duration) % 60)
+    # plotDiversity()
+    fitness = 1- (population[0].fitness/MAX_FITNESS)
+    print("generation:",generation," fitness",population[0].fitness," -> ", fitness)
+    return fitness
+    
+    # population[0].printStandardFormat()
+    
+
+if __name__ == '__main__':
+    
+    start = time.time()
+
+    fitnesses = []
+    avg_fitnesses = []
+
+    for _ in range(10):
+
+        fitnesses.append( ga() )
+
+    print("fitnesses:",fitnesses)
+
+    print("min:",np.min(fitnesses))
+    print("max:",np.max(fitnesses))
+    print("mean:",np.mean(fitnesses))
+    print("median:",np.median(fitnesses))
+    print("variance:",math.sqrt(np.var(fitnesses)))
     
