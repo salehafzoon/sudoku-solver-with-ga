@@ -25,15 +25,15 @@ population = []
 best_fits = []
 avg_fits = []
 
-POPULATION_SIZE = 500
+POPULATION_SIZE = 1000
 TOURNAMENT_SIZE = 4
 MUTATION_RATE = 0.3
 CROSSOVER_RATE = 1
-ELITSM = 0.3
+ELITSM = 0.4
 MAX_GENERATION = 100
 FITNESS_MODE = "mode2"
 MAX_FITNESS = 144
-XOVER_METHOD = "arithmetic"
+XOVER_METHOD = "orderOne"
 
 def calculateListFitness(array):
     l = list(range(1,10))
@@ -158,6 +158,7 @@ class Individual(object):
             self.call_fitness()
 
     def crossOver(self, parent2):
+
         child1 = []
         child2 = []
 
@@ -182,9 +183,58 @@ class Individual(object):
                 else:
                     child1.append(c2)
                     child2.append(c1)
+
         if XOVER_METHOD == "orderOne":
+            
             index1 = randint(0, 8)
-            index2 = randint(0, 8)
+
+            while True:
+                index2 = randint(0, 8)
+                if index2 != index1:
+                    break
+            
+            if index1 > index2:
+                index1 , index2 = index2 , index1
+            
+            # index1 = 2  
+            # index2 = 3
+
+            child1= [[],[],[],[],[],[],[],[],[]]
+            child2= [[],[],[],[],[],[],[],[],[]]
+            
+            for i in range(index1,index2+1):
+                child1[i] = self.chromosome[i]
+                child2[i] = parent2.chromosome[i]
+            
+            i1 = index2 + 1
+            i2 = index2 + 1
+
+            for i in range(index2+1,9):
+                if self.chromosome[i] not in child2:
+                    child2[i1] = self.chromosome[i]
+                    i1 += 1
+                
+                if parent2.chromosome[i] not in child1:
+                    child1[i2] = parent2.chromosome[i]
+                    i2 += 1
+            
+            for i in range(0,index2):
+                i1 = i1 % 9
+                i2 = i2 % 9
+                if self.chromosome[i] not in child2:
+                    child2[i1] = self.chromosome[i]
+                    i1 += 1
+                
+                if parent2.chromosome[i] not in child1:
+                    child1[i2] = parent2.chromosome[i]
+                    i2 += 1
+
+            # if bug:
+                # print("parent1:",self.chromosome)
+                # print("parent2:",parent2.chromosome)
+                # print("index1:",index1," index2:",index2)
+                # print("child1:",child1)
+                # print("child2:",child2)
             
         return (Individual(child1), Individual(child2))
     
@@ -212,6 +262,9 @@ class Individual(object):
         numbers = []
         columns = []
 
+        # print(blocks)
+        # print(len(blocks))
+        
         #we start from block 0 , block 1 , block 2 
         # and go downward to caculate columns
         for i in range(3):
@@ -267,6 +320,14 @@ if __name__ == '__main__':
         chromosome = Individual.create_chromosome()
         indiv = Individual(chromosome)
         population.append(indiv)
+
+#     population[0].chromosome = [[4, 7, 1, 9, 1, 2, 6, 2, 7], [2, 6, 3, 1, 5, 9, 9, 8, 2], [2, 8, 9, 7, 3, 4, 3, 5, 2], [7, 2, 8, 5, 1, 9, 6, 8, 
+# 3], [7, 6, 1, 8, 1, 6, 3, 3, 9], [1, 3, 5, 9, 9, 3, 5, 7, 8], [6, 5, 2, 3, 1, 6, 1, 9, 4], [5, 8, 3, 5, 9, 7, 9, 3, 4], [4, 7, 9, 2, 5, 1, 2, 9, 7]]
+
+#     population[1].chromosome =  [[4, 7, 1, 9, 1, 2, 6, 2, 7], [2, 6, 3, 1, 5, 9, 9, 8, 2], [2, 8, 9, 7, 3, 4, 3, 5, 2], [7, 6, 1, 8, 1, 6, 3, 3, 
+# 9], [1, 3, 5, 9, 9, 3, 5, 7, 8], [4, 3, 6, 5, 7, 1, 5, 6, 8], [2, 6, 1, 3, 5, 1, 9, 9, 4], [5, 8, 3, 5, 9, 7, 9, 3, 4], [4, 8, 9, 2, 1, 1, 4, 8, 6]]
+
+    # population[0].crossOver(population[1])
     
     while not found:
         population = sorted(population, reverse=False, key=lambda x: x.fitness)
